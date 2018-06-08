@@ -1,0 +1,6 @@
+[package]
+name = "hello-grpc"
+version = "0.1.0"
+authors = ["ryutah <ryuta0221@gmail.com>"]
+
+[dependencies]
