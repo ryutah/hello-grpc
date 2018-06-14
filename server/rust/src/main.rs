@@ -1,44 +1,41 @@
-extern crate futures;
-
 use std::thread;
 
 extern crate grpc;
 extern crate protobuf;
 extern crate tls_api;
-extern crate tls_api_native_tls;
+
+use grpc::{RequestOptions, ServerBuilder, SingleResponse};
 
 mod helloworld;
 mod helloworld_grpc;
 
-struct GreetImpl;
+use helloworld::{HelloReply, HelloRequest};
+use helloworld_grpc::{Greeter, GreeterServer};
 
-impl helloworld_grpc::Greeter for GreetImpl {
-    fn say_hello(
-        &self,
-        _m: grpc::RequestOptions,
-        req: helloworld::HelloRequest,
-    ) -> grpc::SingleResponse<helloworld::HelloReply> {
+struct GreeterService;
+
+impl Greeter for GreeterService {
+    fn say_hello(&self, _m: RequestOptions, req: HelloRequest) -> SingleResponse<HelloReply> {
         let name = if req.get_name().len() >= 1 {
             req.get_name()
         } else {
             "John"
         };
 
-        let mut reply = helloworld::HelloReply::new();
+        let mut reply = HelloReply::new();
         reply.set_message(format!("Hello, {}!!!", name));
 
-        grpc::SingleResponse::completed(reply)
+        SingleResponse::completed(reply)
     }
 }
 
 fn main() {
-    let mut builder: grpc::ServerBuilder<tls_api_native_tls::TlsAcceptor> =
-        grpc::ServerBuilder::new();
-    builder
-        .http
-        .set_addr("127.0.0.1:8080")
-        .expect("failed to listen addr");
-    builder.add_service(helloworld_grpc::GreeterServer::new_service_def(GreetImpl));
+    let addr = "127.0.0.1:8080";
+
+    let mut builder = ServerBuilder::new_plain();
+
+    builder.http.set_addr(addr).expect("failed to listen addr");
+    builder.add_service(GreeterServer::new_service_def(GreeterService));
 
     let _server = builder.build().expect("failed to build server");
 

@@ -10,7 +10,6 @@ help: ## Print this help
 
 build: ## Build server, clients
 	cd ./server/rust && cargo build --release
-	protoc -I ./proto/ ./proto/helloworld.proto --go_out=plugins=grpc:client/helloworld
 	go generate github.com/ryutah/hello-grpc/client/go
 	go build -o ./client/go/bin/client github.com/ryutah/hello-grpc/client/go
 
