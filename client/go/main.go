@@ -12,11 +12,21 @@ import (
 	"google.golang.org/grpc"
 )
 
+func greet(ctx context.Context, cli pb.GreeterClient, name string) error {
+	reply, err := cli.SayHello(ctx, &pb.HelloRequest{Name: name})
+	if err != nil {
+		return err
+	}
+	log.Printf("Get Message: %q", reply.GetMessage())
+	return nil
+}
+
 func main() {
 	name := "Default"
 	if len(os.Args) > 1 {
 		name = os.Args[1]
 	}
+
 	conn, err := grpc.Dial("127.0.0.1:8080", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("failed to connect to grpc server %v", err)
@@ -24,10 +34,7 @@ func main() {
 	defer conn.Close()
 
 	client := pb.NewGreeterClient(conn)
-	reply, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: name})
-	if err != nil {
+	if err := greet(context.Background(), client, name); err != nil {
 		log.Fatalf("failed to get replay: %v", err)
 	}
-
-	log.Printf("Get Replay: %q", reply.GetMessage())
 }
