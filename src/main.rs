@@ -34,10 +34,13 @@ impl helloworld_grpc::Greeter for GreetImpl {
 fn main() {
     let mut builder: grpc::ServerBuilder<tls_api_native_tls::TlsAcceptor> =
         grpc::ServerBuilder::new();
-    builder.http.set_port(8080);
+    builder
+        .http
+        .set_addr("127.0.0.1:8080")
+        .expect("failed to listen addr");
     builder.add_service(helloworld_grpc::GreeterServer::new_service_def(GreetImpl));
 
-    builder.build().expect("failed to build server");
+    let _server = builder.build().expect("failed to build server");
 
     println!("greeter server started on port {}", 8080);
 
