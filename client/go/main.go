@@ -1,3 +1,5 @@
+//go:generate protoc -I $PWD/proto/ $PWD/proto/helloworld.proto --go_out=plugins=grpc:$PWD/client/go/helloworld
+
 package main
 
 import (
@@ -5,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	pb "github.com/ryutah/hello-grpc/client/helloworld"
+	pb "github.com/ryutah/hello-grpc/client/go/helloworld"
 
 	"google.golang.org/grpc"
 )

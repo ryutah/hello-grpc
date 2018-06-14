@@ -1,6 +1,4 @@
-/target
-**/*.rs.bk
-### https://raw.github.com/github/gitignore/22a5eb3da72c0a224a179033e92722bdbf5a05ad/Global/Vim.gitignore
+### https://raw.github.com/github/gitignore/1fb9ea045e619c61e223371533cdea118efbea5d/Global/Vim.gitignore
 
 # Swap
 [._]*.s[a-v][a-z]
@@ -16,9 +14,11 @@ Session.vim
 *~
 # Auto-generated tag files
 tags
+# Persistent undo
+[._]*.un~
 
 
-### https://raw.github.com/github/gitignore/22a5eb3da72c0a224a179033e92722bdbf5a05ad/Global/macOS.gitignore
+### https://raw.github.com/github/gitignore/1fb9ea045e619c61e223371533cdea118efbea5d/Global/macOS.gitignore
 
 # General
 .DS_Store
@@ -47,5 +47,4 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-helloworld.rs
-helloworld_grpc.rs
+
