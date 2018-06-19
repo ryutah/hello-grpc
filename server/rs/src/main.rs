@@ -1,5 +1,7 @@
+use std::iter;
 use std::sync::Arc;
 use std::thread;
+use std::time;
 
 extern crate futures;
 use futures::*;
@@ -7,19 +9,19 @@ use futures::*;
 extern crate grpcio;
 extern crate protobuf;
 
+use grpcio::*;
+
 mod helloworld;
 mod helloworld_grpc;
+
+use helloworld::*;
+use helloworld_grpc::*;
 
 #[derive(Clone)]
 struct GreeterService;
 
-impl helloworld_grpc::Greeter for GreeterService {
-    fn say_hello(
-        &self,
-        ctx: grpcio::RpcContext,
-        req: helloworld::HelloRequest,
-        sink: grpcio::UnarySink<helloworld::HelloReply>,
-    ) {
+impl Greeter for GreeterService {
+    fn say_hello(&self, ctx: RpcContext, req: HelloRequest, sink: UnarySink<HelloReply>) {
         let name = if req.get_name().len() > 0 {
             req.get_name()
         } else {
@@ -38,20 +40,26 @@ impl helloworld_grpc::Greeter for GreeterService {
 
     fn get_multi_greet(
         &self,
-        ctx: grpcio::RpcContext,
-        _req: helloworld::MultiGreetRequest,
-        sink: grpcio::ServerStreamingSink<helloworld::MultiGreetReply>,
+        ctx: RpcContext,
+        req: MultiGreetRequest,
+        sink: ServerStreamingSink<MultiGreetReply>,
     ) {
-        let messages = std::iter::repeat(())
+        let name = if req.get_name().len() > 0 {
+            req.get_name().to_owned()
+        } else {
+            "John".to_owned()
+        };
+
+        let messages = iter::repeat(())
             .enumerate()
-            .map(|(i, _)| {
-                std::thread::sleep(std::time::Duration::from_secs(1));
-                let mut reply = helloworld::MultiGreetReply::new();
+            .map(move |(i, _)| {
+                thread::sleep(time::Duration::from_secs(1));
+                let mut reply = MultiGreetReply::new();
                 reply.set_index((i + 1) as i32);
-                reply.set_message("This is message".to_string());
-                (reply, grpcio::WriteFlags::default())
+                reply.set_message(format!("Hello {}!!", name));
+                (reply, WriteFlags::default())
             })
-            .take(10);
+            .take(req.get_count() as usize);
 
         let f = sink
             .send_all(stream::iter_ok::<_, grpcio::Error>(messages))
@@ -63,8 +71,8 @@ impl helloworld_grpc::Greeter for GreeterService {
 }
 
 fn main() {
-    let greet_service = helloworld_grpc::create_greeter(GreeterService);
-    let mut server = grpcio::ServerBuilder::new(Arc::new(grpcio::Environment::new(4)))
+    let greet_service = create_greeter(GreeterService);
+    let mut server = ServerBuilder::new(Arc::new(grpcio::Environment::new(4)))
         .register_service(greet_service)
         .bind("[::]", 8080)
         .build()
