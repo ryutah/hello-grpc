@@ -12,6 +12,7 @@ build: ## Build server, clients
 	cd ./server/rust && cargo build --release
 	go generate github.com/ryutah/hello-grpc/client/go
 	go build -o ./client/go/bin/client github.com/ryutah/hello-grpc/client/go
+	go build -o ./server/go/bin/server github.com/ryutah/hello-grpc/server/go
 
 serve_rust: ## Start Rust server
 	./server/rust/target/release/hello-grpc
