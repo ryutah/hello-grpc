@@ -10,12 +10,17 @@ help: ## Print this help
 
 build: ## Build server, clients
 	cd ./server/rust && cargo build --release
+	cd ./server/rs && cargo build --release
 	go generate github.com/ryutah/hello-grpc/client/go
+	go generate github.com/ryutah/hello-grpc/server/go
 	go build -o ./client/go/bin/client github.com/ryutah/hello-grpc/client/go
 	go build -o ./server/go/bin/server github.com/ryutah/hello-grpc/server/go
 
-serve_rust: ## Start Rust server
+serve_rust: ## Start grpc-rust base Rust server
 	./server/rust/target/release/hello-grpc
+
+serve_rs: ## Start grpc-rs base Rust server
+	./server/rs/target/release/rs
 
 run_go_cli: ## Run golang client. Args: name = greet request name parameter.
 	./client/go/bin/client ${name}
