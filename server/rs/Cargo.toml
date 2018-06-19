@@ -1,0 +1,12 @@
+[package]
+name = "rs"
+version = "0.1.0"
+authors = ["ryutah <ryuta0221@gmail.com>"]
+
+[dependencies]
+futures = "0.1"
+grpcio = "0.3"
+protobuf = "2.0"
+
+[build-dependencies]
+protoc-grpcio = "0.2"
