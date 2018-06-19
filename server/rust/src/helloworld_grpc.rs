@@ -23,6 +23,8 @@
 
 pub trait Greeter {
     fn say_hello(&self, o: ::grpc::RequestOptions, p: super::helloworld::HelloRequest) -> ::grpc::SingleResponse<super::helloworld::HelloReply>;
+
+    fn get_multi_greet(&self, o: ::grpc::RequestOptions, p: super::helloworld::MultiGreetRequest) -> ::grpc::StreamingResponse<super::helloworld::MultiGreetReply>;
 }
 
 // client
@@ -30,6 +32,7 @@ pub trait Greeter {
 pub struct GreeterClient {
     grpc_client: ::grpc::Client,
     method_SayHello: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::helloworld::HelloRequest, super::helloworld::HelloReply>>,
+    method_GetMultiGreet: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::helloworld::MultiGreetRequest, super::helloworld::MultiGreetReply>>,
 }
 
 impl GreeterClient {
@@ -39,6 +42,12 @@ impl GreeterClient {
             method_SayHello: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
                 name: "/Greeter/SayHello".to_string(),
                 streaming: ::grpc::rt::GrpcStreaming::Unary,
+                req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+            }),
+            method_GetMultiGreet: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                name: "/Greeter/GetMultiGreet".to_string(),
+                streaming: ::grpc::rt::GrpcStreaming::ServerStreaming,
                 req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
                 resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
             }),
@@ -60,6 +69,10 @@ impl GreeterClient {
 impl Greeter for GreeterClient {
     fn say_hello(&self, o: ::grpc::RequestOptions, p: super::helloworld::HelloRequest) -> ::grpc::SingleResponse<super::helloworld::HelloReply> {
         self.grpc_client.call_unary(o, p, self.method_SayHello.clone())
+    }
+
+    fn get_multi_greet(&self, o: ::grpc::RequestOptions, p: super::helloworld::MultiGreetRequest) -> ::grpc::StreamingResponse<super::helloworld::MultiGreetReply> {
+        self.grpc_client.call_server_streaming(o, p, self.method_GetMultiGreet.clone())
     }
 }
 
@@ -83,6 +96,18 @@ impl GreeterServer {
                     {
                         let handler_copy = handler_arc.clone();
                         ::grpc::rt::MethodHandlerUnary::new(move |o, p| handler_copy.say_hello(o, p))
+                    },
+                ),
+                ::grpc::rt::ServerMethod::new(
+                    ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                        name: "/Greeter/GetMultiGreet".to_string(),
+                        streaming: ::grpc::rt::GrpcStreaming::ServerStreaming,
+                        req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                        resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                    }),
+                    {
+                        let handler_copy = handler_arc.clone();
+                        ::grpc::rt::MethodHandlerServerStreaming::new(move |o, p| handler_copy.get_multi_greet(o, p))
                     },
                 ),
             ],

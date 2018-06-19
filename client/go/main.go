@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
 	"os"
 
@@ -18,6 +19,27 @@ func greet(ctx context.Context, cli pb.GreeterClient, name string) error {
 		return err
 	}
 	log.Printf("Get Message: %q", reply.GetMessage())
+	return nil
+}
+
+func multiGreet(ctx context.Context, cli pb.GreeterClient, name string) error {
+	stream, err := cli.GetMultiGreet(ctx, &pb.MultiGreetRequest{
+		Count: 10,
+		Name:  name,
+	})
+	if err != nil {
+		return err
+	}
+
+	for {
+		reply, err := stream.Recv()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		}
+		log.Printf("Get Multi Message: index(%v), %q", reply.GetIndex(), reply.GetMessage())
+	}
 	return nil
 }
 
@@ -36,5 +58,9 @@ func main() {
 	client := pb.NewGreeterClient(conn)
 	if err := greet(context.Background(), client, name); err != nil {
 		log.Fatalf("failed to get replay: %v", err)
+	}
+
+	if err := multiGreet(context.Background(), client, name); err != nil {
+		log.Fatalf("failed to get multi replay: %v", err)
 	}
 }
