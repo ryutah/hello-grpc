@@ -27,7 +27,7 @@ func main() {
 		name = os.Args[1]
 	}
 
-	conn, err := grpc.Dial("127.0.0.1:8080", grpc.WithInsecure())
+	conn, err := grpc.Dial("[::]:8080", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("failed to connect to grpc server %v", err)
 	}

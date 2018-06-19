@@ -30,11 +30,12 @@ impl Greeter for GreeterService {
 }
 
 fn main() {
-    let addr = "127.0.0.1:8080";
-
     let mut builder = ServerBuilder::new_plain();
 
-    builder.http.set_addr(addr).expect("failed to listen addr");
+    // if want to use ipv4.
+    // builder.http.set_addr("127.0.0.1:8080").expect("failed to listen addr");
+
+    builder.http.set_port(8080);
     builder.add_service(GreeterServer::new_service_def(GreeterService));
 
     let _server = builder.build().expect("failed to build server");

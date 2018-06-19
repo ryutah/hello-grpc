@@ -15,3 +15,6 @@ build: ## Build server, clients
 
 serve_rust: ## Start Rust server
 	./server/rust/target/release/hello-grpc
+
+run_go_cli: ## Run golang client. Args: name = greet request name parameter.
+	./client/go/bin/client ${name}
