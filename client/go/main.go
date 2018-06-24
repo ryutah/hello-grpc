@@ -4,9 +4,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"time"
 
 	pb "github.com/ryutah/hello-grpc/client/go/helloworld"
 
@@ -43,6 +45,26 @@ func multiGreet(ctx context.Context, cli pb.GreeterClient, name string) error {
 	return nil
 }
 
+func streamClient(ctx context.Context, cli pb.GreeterClient, name string) error {
+	strm, err := cli.CLIStreamSayHello(ctx)
+	if err != nil {
+		return err
+	}
+	for i := 0; i < 10; i++ {
+		req := &pb.HelloRequest{Name: fmt.Sprintf("%s(%d)", name, i+1)}
+		if err := strm.Send(req); err != nil {
+			return fmt.Errorf("failed to send request: %v", err)
+		}
+		time.Sleep(time.Second)
+	}
+	rep, err := strm.CloseAndRecv()
+	if err != nil {
+		return err
+	}
+	log.Printf("Get Streaming Client Message: %q", rep.GetMessage())
+	return nil
+}
+
 func main() {
 	name := "Default"
 	if len(os.Args) > 1 {
@@ -62,5 +84,9 @@ func main() {
 
 	if err := multiGreet(context.Background(), client, name); err != nil {
 		log.Fatalf("failed to get multi replay: %v", err)
+	}
+
+	if err := streamClient(context.Background(), client, name); err != nil {
+		log.Fatalf("failed to client streaming replay: %v", err)
 	}
 }
