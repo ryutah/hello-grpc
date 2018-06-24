@@ -68,6 +68,34 @@ impl Greeter for GreeterService {
 
         ctx.spawn(f)
     }
+
+    fn cli_stream_say_hello(
+        &self,
+        ctx: RpcContext,
+        stream: RequestStream<HelloRequest>,
+        reply: ClientStreamingSink<HelloReply>,
+    ) {
+        let f = stream
+            .map(|req| {
+                println!("Receive: {:?}", req);
+                if req.get_name().len() > 0 {
+                    req.get_name().to_owned()
+                } else {
+                    "John".to_owned()
+                }
+            })
+            .fold(String::new(), |sum, name| {
+                Ok(format!("{}, {}", sum, name)) as Result<String>
+            })
+            .and_then(move |name| {
+                let mut rep = HelloReply::new();
+                rep.set_message(format!("Hello {}!!", name));
+                reply.success(rep)
+            })
+            .map_err(|e| println!("failed to reply: {:?}", e));
+
+        ctx.spawn(f);
+    }
 }
 
 fn main() {
