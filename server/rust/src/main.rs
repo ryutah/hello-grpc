@@ -4,13 +4,13 @@ extern crate grpc;
 extern crate protobuf;
 extern crate tls_api;
 
-use grpc::{RequestOptions, ServerBuilder, SingleResponse, StreamingResponse};
+use grpc::*;
 
 mod helloworld;
 mod helloworld_grpc;
 
-use helloworld::{HelloReply, HelloRequest, MultiGreetReply, MultiGreetRequest};
-use helloworld_grpc::{Greeter, GreeterServer};
+use helloworld::*;
+use helloworld_grpc::*;
 
 struct GreeterService;
 
@@ -51,6 +51,14 @@ impl Greeter for GreeterService {
             })
             .take(req.get_count() as usize);
         StreamingResponse::iter(it)
+    }
+
+    fn cli_stream_say_hello(
+        &self,
+        _o: RequestOptions,
+        _p: StreamingRequest<HelloRequest>,
+    ) -> SingleResponse<HelloReply> {
+        SingleResponse::completed(HelloReply::new())
     }
 }
 
