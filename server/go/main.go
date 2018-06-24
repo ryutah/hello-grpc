@@ -1,12 +1,14 @@
-//go:generate protoc -I $PWD/proto/ $PWD/proto/helloworld.proto --go_out=plugins=grpc:$PWD/client/go/helloworld
+//go:generate protoc -I $PWD/proto/ $PWD/proto/helloworld.proto --go_out=plugins=grpc:$PWD/server/go/helloworld
 
 package main
 
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -41,6 +43,25 @@ func (g *greeterServer) GetMultiGreet(req *pb.MultiGreetRequest, stream pb.Greet
 	}
 
 	return nil
+}
+
+func (g *greeterServer) CLIStreamSayHello(stream pb.Greeter_CLIStreamSayHelloServer) error {
+	var names []string
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return fmt.Errorf("failed to receive request: %v", err)
+		}
+		if len(req.GetName()) > 0 {
+			names = append(names, req.GetName())
+		} else {
+			names = append(names, "John")
+		}
+	}
+	resp := &pb.HelloReply{Message: fmt.Sprintf("Hello %s!!", strings.Join(names, ", "))}
+	return stream.SendAndClose(resp)
 }
 
 func main() {
