@@ -3,6 +3,7 @@ syntax = "proto3";
 service Greeter {
   rpc SayHello (HelloRequest) returns (HelloReply) {}
   rpc GetMultiGreet (MultiGreetRequest) returns (stream MultiGreetReply) {}
+  rpc CLIStreamSayHello (stream HelloRequest) returns (HelloReply) {}
 }
 
 message HelloRequest {
@@ -22,4 +23,3 @@ message MultiGreetReply {
   int32 index = 1;
   string message = 2;
 }
-
