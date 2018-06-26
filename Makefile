@@ -22,5 +22,8 @@ serve_rust: ## Start grpc-rust base Rust server
 serve_rs: ## Start grpc-rs base Rust server
 	./server/rs/target/release/rs
 
+serve_go: ## Start grpc base Golang
+	./server/go/bin/server
+
 run_go_cli: ## Run golang client. Args: name = greet request name parameter.
 	./client/go/bin/client ${name}
