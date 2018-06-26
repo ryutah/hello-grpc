@@ -54,6 +54,7 @@ func (g *greeterServer) CLIStreamSayHello(stream pb.Greeter_CLIStreamSayHelloSer
 		} else if err != nil {
 			return fmt.Errorf("failed to receive request: %v", err)
 		}
+		log.Printf("Receive: %#v", req)
 		if len(req.GetName()) > 0 {
 			names = append(names, req.GetName())
 		} else {
